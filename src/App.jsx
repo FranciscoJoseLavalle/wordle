@@ -17,6 +17,9 @@ function App() {
 
   const [actualRow, setActualRow] = useState(0)
   const [canProceed, setCanProceed] = useState(true);
+  const [error, setError] = useState(null);
+  const [gameEnded, setGameEnded] = useState(false);
+
   const words = dictionary.filter(w => w.length === 5);
   const [word, setWord] = useState(words[(Math.random() * words.length).toFixed(0)].toUpperCase());
 
@@ -37,6 +40,22 @@ function App() {
       document.removeEventListener('keyup', handleKeyUp);
     };
   }, [attemps, actualRow, canProceed, word]);
+
+  const resetGame = () => {
+    setAttemps([
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+    ]);
+    setActualRow(0);
+    setCanProceed(true);
+    setError(null);
+    setWord(words[(Math.random() * words.length).toFixed(0)].toUpperCase());
+    setGameEnded(false);
+  }
 
   const selectKey = (key) => {
     addLetter(key.letter)
@@ -76,7 +95,7 @@ function App() {
   }
 
   const sendWord = () => {
-    if (!canProceed && checkWord()) {
+    if (checkWord() && !canProceed) {
       setCanProceed(true);
       setActualRow(prev => prev + 1);
     }
@@ -88,15 +107,27 @@ function App() {
       return true;
     }
 
+    if (actualWord.length < 5) {
+      showError('Palabra muy corta');
+    } else {
+      showError('Palabra no encontrada');
+    }
     return false;
+  }
+
+  const showError = (message) => {
+    setError(message);
+    setTimeout(() => {
+      setError(null);
+    }, 1500)
   }
 
   return (
     <>
       <h1>Wordle</h1>
-      <Table attemps={attemps} word={word} actualRow={actualRow} />
-      <KeysContainer selectKey={selectKey} deleteLetter={deleteLetter} />
-      <button onClick={sendWord} className="key">Enviar</button>
+      {error && <div className='error_container'><p>{error}</p></div>}
+      <Table attemps={attemps} word={word} actualRow={actualRow} error={error} />
+      <KeysContainer selectKey={selectKey} deleteLetter={deleteLetter} sendWord={sendWord} word={word} attemps={attemps} />
     </>
   )
 }

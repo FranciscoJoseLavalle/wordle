@@ -1,8 +1,26 @@
 .keys_container {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
-    margin: auto;
-    width: 30rem;
-    gap: .5rem;
+    align-items: center;
+    width: 100%;
+    gap: .35rem;
+    padding: 0 .5rem;
+}
+
+.keysRow {
+    display: flex;
+    gap: .35rem;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width:450px) {
+
+    .keysRow,
+    .keys_container {
+        gap: .25rem;
+    }
 }

@@ -1,9 +1,9 @@
 import './TableRow.css';
 import { TableSquare } from '../TableSquare/TableSquare'
 
-export const TableRow = ({ wordAttempt, word, isOldRow }) => {
+export const TableRow = ({ wordAttempt, word, isOldRow, error }) => {
     return (
-        <div className='table_row'>
+        <div className={`table_row ${error ? 'error' : ''}`}>
             {[0, 1, 2, 3, 4].map((i) => (
                 <TableSquare
                     key={i}

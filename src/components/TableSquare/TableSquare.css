@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    font-weight: 900;
+    font-weight: 700;
     text-transform: uppercase;
 }
 
@@ -23,19 +23,18 @@
     color: #fff;
     animation-name: isOld;
     animation-duration: .5s;
-    /* animation-iteration-count: infinite; */
 }
 
 .green {
-    background-color: #8d8;
+    background-color: #6a6;
 }
 
 .yellow {
-    background-color: #e90;
+    background-color: #ba4;
 }
 
 .grey {
-    background-color: #999;
+    background-color: #888;
 }
 
 @keyframes active {

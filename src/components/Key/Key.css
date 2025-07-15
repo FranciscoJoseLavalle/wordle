@@ -1,15 +1,26 @@
 .key {
     padding: .5rem;
     background-color: #ccc;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 1.1rem;
     text-transform: uppercase;
     border-radius: .2rem;
-    width: 2.5rem;
+    max-width: 2.5rem;
     height: 3rem;
     min-width: min-content;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     border: none;
+}
+
+.key_send {
+    font-size: .85rem;
+    font-weight: 600;
+}
+@media (max-width:400px) {
+    .key {
+        font-size: .9rem;
+    }
 }
