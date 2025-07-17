@@ -1,24 +1,19 @@
 import { useEffect, useState } from 'react';
 import './TableSquare.css';
 
-export const TableSquare = ({ letter, correctLetter, word, isOldRow, index }) => {
+export const TableSquare = ({ letter, word, isOldRow, index, rowColor }) => {
     const [color, setColor] = useState('');
 
     useEffect(() => {
-        if (isOldRow && letter) {
+        setColor('');
+        if (isOldRow) {
             const timeout = setTimeout(() => {
-                if (letter.toUpperCase() === correctLetter) {
-                    setColor('green');
-                } else if ([...word].includes(letter.toUpperCase())) {
-                    setColor('yellow');
-                } else {
-                    setColor('grey');
-                }
+                setColor(rowColor)
             }, index * 300);
 
             return () => clearTimeout(timeout);
         }
-    }, [isOldRow, letter, correctLetter, word, index]);
+    }, [isOldRow, word, index]);
 
     return (
         <div className={`table_square ${color} ${letter ? 'is_active' : ''}`}>{letter}</div>

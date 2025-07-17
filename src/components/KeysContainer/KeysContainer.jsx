@@ -39,13 +39,13 @@ const keysRows = [
     ]
 ]
 
-export const KeysContainer = ({ selectKey, deleteLetter, sendWord }) => {
+export const KeysContainer = ({ selectKey, deleteLetter, sendWord, keyboardColors }) => {
 
     return (
         <div className='keys_container'>
             {keysRows.map((keysRow, i) =>
                 <div className='keysRow' key={i}>
-                    {keysRow.map(key => <Key key={key.letter} keyObj={key} selectKey={selectKey} deleteLetter={deleteLetter} sendWord={sendWord} />)}
+                    {keysRow.map(key => <Key key={key.letter} keyObj={key} selectKey={selectKey} deleteLetter={deleteLetter} sendWord={sendWord} keyboardColors={keyboardColors} />)}
                 </div>
             )}
         </div>

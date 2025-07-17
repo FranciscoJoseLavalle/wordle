@@ -2,9 +2,9 @@ import './Key.css';
 
 import DeleteIcon from '../../assets/img/backspace.png';
 
-export const Key = ({ keyObj, selectKey, deleteLetter, sendWord }) => {
+export const Key = ({ keyObj, selectKey, deleteLetter, sendWord, keyboardColors }) => {
     return (
-        <div className={`key ${keyObj.action === 'send' ? 'key_send' : ''}`} onClick={() => {
+        <div className={`key ${keyboardColors[keyObj.letter.toUpperCase()] || ''} ${keyObj.action === 'send' ? 'key_send' : ''}`} onClick={() => {
             if (keyObj.action === 'delete') {
                 deleteLetter();
             } else if (keyObj.action === 'send') {
@@ -13,7 +13,7 @@ export const Key = ({ keyObj, selectKey, deleteLetter, sendWord }) => {
                 selectKey(keyObj)
             }
         }}>
-            {keyObj.action === 'delete' ? <img src={DeleteIcon} width={26}/> : keyObj.letter}
+            {keyObj.action === 'delete' ? <img src={DeleteIcon} width={26} /> : keyObj.letter}
         </div>
     )
 }

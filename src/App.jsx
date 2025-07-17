@@ -7,18 +7,19 @@ import dictionary from './assets/dictionary.json';
 
 function App() {
   const [attemps, setAttemps] = useState([
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
+    [], [], [], [], [], [],
   ]);
 
   const [actualRow, setActualRow] = useState(0)
   const [canProceed, setCanProceed] = useState(true);
   const [error, setError] = useState(null);
   const [gameEnded, setGameEnded] = useState(false);
+  const [win, setWin] = useState(false);
+
+  const [keyboardColors, setKeyboardColors] = useState({});
+  const [rowColors, setRowColors] = useState([
+    [], [], [], [], [], []
+  ]);
 
   const words = dictionary.filter(w => w.length === 5);
   const [word, setWord] = useState(words[(Math.random() * words.length).toFixed(0)].toUpperCase());
@@ -29,7 +30,7 @@ function App() {
         sendWord();
       } else if (e.key === 'Backspace') {
         deleteLetter();
-      } else {
+      } else if (e.code.includes('Key') || e.key === 'ñ') {
         addLetter(e.key);
       }
     };
@@ -43,18 +44,65 @@ function App() {
 
   const resetGame = () => {
     setAttemps([
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
+      [], [], [], [], [], [],
     ]);
     setActualRow(0);
     setCanProceed(true);
     setError(null);
     setWord(words[(Math.random() * words.length).toFixed(0)].toUpperCase());
     setGameEnded(false);
+    setRowColors([
+      [], [], [], [], [], []
+    ]);
+    setKeyboardColors({});
+    setWin(false);
+  }
+
+  const evaluateAttempt = (attempt) => {
+    const colors = Array(5).fill('grey');
+    const wordLetters = getRepeatedLetters(word);
+    const keyboardMap = {};
+
+    attempt.forEach((letter, i) => {
+      const upperLetter = letter.toUpperCase();
+      const correctLetter = word[i];
+
+      if (upperLetter === correctLetter) {
+        colors[i] = 'green';
+        wordLetters[upperLetter]--;
+        keyboardMap[upperLetter] = 'green';
+      }
+    });
+
+    attempt.forEach((letter, i) => {
+      const upperLetter = letter.toUpperCase();
+
+      if (colors[i] === 'grey') {
+        if (word.includes(upperLetter) && wordLetters[upperLetter] > 0) {
+          colors[i] = 'yellow';
+          wordLetters[upperLetter]--;
+          if (keyboardMap[upperLetter] !== 'green') {
+            keyboardMap[upperLetter] = 'yellow';
+          }
+        } else {
+          if (!keyboardMap[upperLetter]) {
+            keyboardMap[upperLetter] = 'grey';
+          }
+        }
+      }
+    });
+
+    return { colors, keyboardMap };
+  }
+
+  const getRepeatedLetters = (word) => {
+    let letters = {};
+
+    for (const letter of word) {
+      letters[letter] = (letters[letter] || 0) + 1;
+    }
+
+    return letters;
   }
 
   const selectKey = (key) => {
@@ -62,13 +110,14 @@ function App() {
   }
 
   const addLetter = (letter) => {
+    if (gameEnded) return;
     setAttemps((prevAttemps) => {
       const newAttemps = prevAttemps.map((attempt) => [...attempt]);
 
       const currentAttemptIndex = newAttemps.findIndex(attempt => attempt.length < 5);
 
       if (currentAttemptIndex !== -1 && newAttemps[actualRow].length < 5 && canProceed) {
-        newAttemps[actualRow].push(letter);
+        newAttemps[actualRow].push(letter.toUpperCase());
       } else {
         setCanProceed(false);
       }
@@ -82,6 +131,7 @@ function App() {
   }
 
   const deleteLetter = () => {
+    if (gameEnded) return;
     setAttemps((prevAttemps) => {
       const newAttemps = prevAttemps.map((attempt) => [...attempt]);
 
@@ -96,6 +146,45 @@ function App() {
 
   const sendWord = () => {
     if (checkWord() && !canProceed) {
+      let actualWord = attemps[actualRow].join('');
+      window.gtag('event', 'send_word', {
+        actualWord,
+        correctWord: word
+      });
+
+      const { colors, keyboardMap } = evaluateAttempt(attemps[actualRow]);
+      setKeyboardColors(prev => {
+        const updated = { ...prev };
+        Object.entries(keyboardMap).forEach(([letter, color]) => {
+          const currentColor = updated[letter];
+          if (!currentColor || isBetterColor(color, currentColor)) {
+            updated[letter] = color;
+          }
+        });
+        return updated;
+      });
+      setRowColors(prev => {
+        const updated = [...prev];
+        updated[actualRow] = colors;
+        return updated;
+      });
+
+      if (actualWord === word) {
+        window.gtag('event', 'win', {
+          actualWord,
+          correctWord: word
+        });
+        setGameEnded(true);
+        setWin(true);
+      } else if (actualRow === 5) {
+        window.gtag('event', 'lose', {
+          actualWord,
+          correctWord: word
+        });
+        setGameEnded(true);
+        setWin(false);
+      }
+
       setCanProceed(true);
       setActualRow(prev => prev + 1);
     }
@@ -103,7 +192,7 @@ function App() {
 
   const checkWord = () => {
     let actualWord = attemps[actualRow].join('');
-    if (words.find(w => w === actualWord)) {
+    if (words.find(w => w === actualWord.toLowerCase())) {
       return true;
     }
 
@@ -112,8 +201,14 @@ function App() {
     } else {
       showError('Palabra no encontrada');
     }
+
     return false;
   }
+
+  const isBetterColor = (newColor, currentColor) => {
+    const priority = { green: 3, yellow: 2, grey: 1 };
+    return priority[newColor] > priority[currentColor];
+  };
 
   const showError = (message) => {
     setError(message);
@@ -125,9 +220,18 @@ function App() {
   return (
     <>
       <h1>Wordle</h1>
+      {gameEnded &&
+        <div className='game_ended'>
+          <div>
+            <h4>¡{win ? 'Ganaste' : 'Perdiste'}!</h4>
+            <p>La palabra era <b>{word}</b></p>
+            <button onClick={resetGame} className={`btn ${win ? 'green' : 'grey'}`} >Reiniciar</button>
+          </div>
+        </div>
+      }
       {error && <div className='error_container'><p>{error}</p></div>}
-      <Table attemps={attemps} word={word} actualRow={actualRow} error={error} />
-      <KeysContainer selectKey={selectKey} deleteLetter={deleteLetter} sendWord={sendWord} word={word} attemps={attemps} />
+      <Table attemps={attemps} word={word} actualRow={actualRow} error={error} rowColors={rowColors} />
+      <KeysContainer selectKey={selectKey} deleteLetter={deleteLetter} sendWord={sendWord} keyboardColors={keyboardColors} />
     </>
   )
 }

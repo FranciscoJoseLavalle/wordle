@@ -2,7 +2,39 @@ h1 {
     text-align: center;
     padding: 1rem;
     border-bottom: solid 1px #bbb;
-    margin-bottom: 2rem;
+}
+
+.game_ended {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #0002;
+    backdrop-filter: blur(.15rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.game_ended>div {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    box-shadow: #555 0 0 15px 2px;
+}
+.game_ended h4 {
+    text-align: center;
+}
+.game_ended button {
+    font-weight: 600;
+    padding: .5rem;
+    border-radius: .25rem;
+    width: 100%;
 }
 
 .error_container {
