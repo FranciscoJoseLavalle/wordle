@@ -15,6 +15,7 @@ function App() {
   const [error, setError] = useState(null);
   const [gameEnded, setGameEnded] = useState(false);
   const [win, setWin] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const [keyboardColors, setKeyboardColors] = useState({});
   const [rowColors, setRowColors] = useState([
@@ -51,6 +52,7 @@ function App() {
     setError(null);
     setWord(words[(Math.random() * words.length).toFixed(0)].toUpperCase());
     setGameEnded(false);
+    setShowModal(false);
     setRowColors([
       [], [], [], [], [], []
     ]);
@@ -145,6 +147,7 @@ function App() {
   }
 
   const sendWord = () => {
+    console.log(word);
     if (checkWord() && !canProceed) {
       let actualWord = attemps[actualRow].join('');
       window.gtag('event', 'send_word', {
@@ -175,6 +178,7 @@ function App() {
           correctWord: word
         });
         setGameEnded(true);
+        setShowModal(true);
         setWin(true);
       } else if (actualRow === 5) {
         window.gtag('event', 'lose', {
@@ -182,6 +186,7 @@ function App() {
           correctWord: word
         });
         setGameEnded(true);
+        setShowModal(true);
         setWin(false);
       }
 
@@ -221,11 +226,17 @@ function App() {
     <>
       <h1>Wordle</h1>
       {gameEnded &&
-        <div className='game_ended'>
-          <div>
-            <h4>¡{win ? 'Ganaste' : 'Perdiste'}!</h4>
-            <p>La palabra era <b>{word}</b></p>
-            <button onClick={resetGame} className={`btn ${win ? 'green' : 'grey'}`} >Reiniciar</button>
+        <div className='game_ended_container'>
+          {!showModal && <button className='btn btn-showResult' onClick={() => setShowModal(true)}>Ver resultado</button>}
+          <div className='game_ended' style={{
+            display: showModal ? 'flex' : 'none'
+          }}>
+            <div>
+              <span onClick={() => setShowModal(false)} className="close_modal">x</span>
+              <h4>¡{win ? 'Ganaste' : 'Perdiste'}!</h4>
+              <p>La palabra era <b>{word}</b></p>
+              <button onClick={resetGame} className={`btn ${win ? 'green' : 'grey'}`} >Reiniciar</button>
+            </div>
           </div>
         </div>
       }
