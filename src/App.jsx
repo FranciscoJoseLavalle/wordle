@@ -147,7 +147,6 @@ function App() {
   }
 
   const sendWord = () => {
-    console.log(word);
     if (checkWord() && !canProceed) {
       let actualWord = attemps[actualRow].join('');
       window.gtag('event', 'send_word', {
